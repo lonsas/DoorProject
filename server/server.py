@@ -7,6 +7,7 @@ logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 # Bind the socket to the address given on the command line
 server_name = sys.argv[1]
@@ -16,20 +17,19 @@ sock.bind(server_address)
 sock.listen(1)
 
 
+while True:
+    logging.info('waiting for a connection')
+    connection, client_address = sock.accept()
+    try:
+        logging.info('client connected: %s, %s' % client_address)
 
-logging.info('waiting for a connection')
-connection, client_address = sock.accept()
-try:
-    logging.info('client connected: %s, %s' % client_address)
-    while True:
-        data = connection.recv(16)
+        data = connection.recv(8)
         logging.info('received "%s"' % data)
         if data:
-            if data == 'DOOROPEN\n':
+            if data == 'DOOROPEN':
                 call(['playerctl', 'play-pause'])
             connection.sendall(data)
-        else:
-            break
-finally:
-    connection.close()
-    sock.close()
+    finally:
+        connection.close()
+        logging.info('client disconnected: %s, %s' % client_address)
+sock.close()
