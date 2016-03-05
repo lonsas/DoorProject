@@ -1,44 +1,43 @@
 #include "Arduino.h"
 
-#define DEBUG
+//#define DEBUG
 
-int sensorPin = A9;
+int sensorPin = A0;
 int espEnPin = 3;
 int ledPin = 2;
+int statusPin = 4;
 int sensorValue = 0;
 int thres = 1000;
 bool doorOpen = false;
 bool prevDoorOpen = false;
 bool in = true;
 void setup() {
-  Serial.begin(115200);
-  Serial1.begin(9600);
+  Serial.begin(9600);
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW);
   pinMode(espEnPin, OUTPUT);
-  digitalWrite(espEnPin, HIGH);
+  digitalWrite(espEnPin, LOW);
+  pinMode(statusPin, OUTPUT);
+  digitalWrite(statusPin, LOW);
 }
 
 void sendCommand() {
+    digitalWrite(statusPin, HIGH);
     digitalWrite(espEnPin, HIGH);
     delay(2000);
     do {
-        Serial1.write("AT+CIPSTART=\"TCP\",\"31.208.43.115\",8000\r\n");
+        Serial.write("AT+CIPSTART=\"TCP\",\"31.208.43.115\",8000\r\n");
         delay(500);
-        Serial1.write("AT+CIPSEND=8\r\n");
+        Serial.write("AT+CIPSEND=8\r\n");
         delay(100);
-        Serial1.write("DOOROPEN");
-        Serial1.write("AT+CIPCLOSE\r\n");
+        Serial.write("DOOROPEN");
+        Serial.write("AT+CIPCLOSE\r\n");
         delay(500);
-    } while(!Serial1.find("CONNECT"));
+    } while(!Serial.find("CONNECT"));
     digitalWrite(espEnPin, LOW);
 }
 void loop() {
-#ifdef DEBUG
-    while(Serial1.available()) {
-        Serial.write(Serial1.read());
-    }
-#endif
+
     digitalWrite(ledPin, HIGH);
     // Give the led time to shine, doesn't work otherwise
     delay(5);
@@ -51,10 +50,15 @@ void loop() {
       sendCommand();
     }
     prevDoorOpen = doorOpen;
+#ifdef DEBUG
+    while(Serial1.available()) {
+        Serial.write(Serial1.read());
+    }
     Serial.println(in);
     Serial.println(thres);
     Serial.println(sensorValue);
     Serial.println();
+ #endif
     delay(1000);
 }
 
