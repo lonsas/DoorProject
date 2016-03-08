@@ -1,13 +1,14 @@
 #include "Arduino.h"
 
-//#define DEBUG
+//#define SERIALDEBUG
+#define LEDDEBUG
 
 int sensorPin = A0;
 int espEnPin = 3;
 int ledPin = 2;
 int statusPin = 4;
 int sensorValue = 0;
-int thres = 1000;
+int thres = 520;
 bool doorOpen = false;
 bool prevDoorOpen = false;
 bool in = true;
@@ -22,7 +23,7 @@ void setup() {
 }
 
 void sendCommand() {
-    digitalWrite(statusPin, HIGH);
+
     digitalWrite(espEnPin, HIGH);
     delay(2000);
     do {
@@ -37,20 +38,30 @@ void sendCommand() {
     digitalWrite(espEnPin, LOW);
 }
 void loop() {
-
     digitalWrite(ledPin, HIGH);
     // Give the led time to shine, doesn't work otherwise
-    delay(5);
+    delay(40);
     sensorValue = analogRead(sensorPin);
     digitalWrite(ledPin, LOW);
     doorOpen = sensorValue > thres;
+#ifdef LEDDEBUG
+    if(!doorOpen) {
+    digitalWrite(statusPin, HIGH);
+    delay(200);
+    digitalWrite(statusPin, LOW);
+    } else {
+    digitalWrite(statusPin, HIGH);
+    delay(1000);
+    digitalWrite(statusPin, LOW);
+    }
+#endif
     if(prevDoorOpen && !doorOpen) {
       // Someone open and closed the door, then they probably passed the door;
       in = !in;
       sendCommand();
     }
     prevDoorOpen = doorOpen;
-#ifdef DEBUG
+#ifdef SERIALDEBUG
     while(Serial1.available()) {
         Serial.write(Serial1.read());
     }
