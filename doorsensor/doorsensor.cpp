@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "LowPower.h"
 //#define SERIALDEBUG
-#define LEDDEBUG
+//#define LEDDEBUG
 #define MAX_CONNECT_TRIES 10
 
 int sensorPin = A0;
@@ -32,14 +32,15 @@ void sendCommand() {
         delay(50);
         tries++;
     } while(!Serial.find("CONNECT") && tries < MAX_CONNECT_TRIES);
-        Serial.write("AT+CIPSEND=8\r\n");
-        delay(50);
-        Serial.write("DOOROPEN");
-        Serial.write("AT+CIPCLOSE\r\n");
-        delay(200);
+    Serial.write("AT+CIPSEND=8\r\n");
+    delay(50);
+    Serial.write("DOOROPEN");
+    Serial.write("AT+CIPCLOSE\r\n");
+    delay(200);
    
     digitalWrite(espEnPin, LOW);
 }
+
 void loop() {
     digitalWrite(ledPin, HIGH);
     // Give the led time to shine, doesn't work otherwise
@@ -58,9 +59,7 @@ void loop() {
     digitalWrite(statusPin, LOW);
     }
 #endif
-    if(prevDoorOpen && !doorOpen) {
-      // Someone open and closed the door, then they probably passed the door;
-      in = !in;
+    if(!prevDoorOpen && doorOpen) {
       sendCommand();
     }
     prevDoorOpen = doorOpen;
@@ -68,7 +67,6 @@ void loop() {
     while(Serial1.available()) {
         Serial.write(Serial1.read());
     }
-    Serial.println(in);
     Serial.println(thres);
     Serial.println(sensorValue);
     Serial.println();
