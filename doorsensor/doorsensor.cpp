@@ -1,7 +1,8 @@
 #include "Arduino.h"
-
+#include "LowPower.h"
 //#define SERIALDEBUG
 #define LEDDEBUG
+#define MAX_CONNECT_TRIES 10
 
 int sensorPin = A0;
 int espEnPin = 3;
@@ -25,16 +26,18 @@ void setup() {
 void sendCommand() {
 
     digitalWrite(espEnPin, HIGH);
-    delay(2000);
+    int tries = 0;
     do {
-        Serial.write("AT+CIPSTART=\"TCP\",\"31.208.43.115\",8000\r\n");
-        delay(500);
+        Serial.write("AT+CIPSTART=\"TCP\",\"192.168.1.2\",8000\r\n");
+        delay(50);
+        tries++;
+    } while(!Serial.find("CONNECT") && tries < MAX_CONNECT_TRIES);
         Serial.write("AT+CIPSEND=8\r\n");
-        delay(100);
+        delay(50);
         Serial.write("DOOROPEN");
         Serial.write("AT+CIPCLOSE\r\n");
-        delay(500);
-    } while(!Serial.find("CONNECT"));
+        delay(200);
+   
     digitalWrite(espEnPin, LOW);
 }
 void loop() {
@@ -70,6 +73,6 @@ void loop() {
     Serial.println(sensorValue);
     Serial.println();
  #endif
-    delay(1000);
+    LowPower.idle(SLEEP_1S, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF, USART0_OFF, TWI_OFF);
 }
 

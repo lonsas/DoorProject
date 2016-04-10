@@ -3,7 +3,7 @@ import sys
 import logging
 from subprocess import call
 
-logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s %(levelname)s  %(message)s', stream=sys.stderr, level=logging.DEBUG)
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -27,6 +27,7 @@ while True:
         logging.info('received "%s"' % data)
         if data:
             if data == 'DOOROPEN':
+                logging.info('play-pause')
                 call(['playerctl', 'play-pause'])
             connection.sendall(data)
     finally:
