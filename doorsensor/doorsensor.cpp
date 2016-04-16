@@ -5,11 +5,12 @@
 #define MAX_CONNECT_TRIES 10
 
 int sensorPin = A0;
+int sensorEnPin = 5;
 int espEnPin = 3;
 int ledPin = 2;
 int statusPin = 4;
 int sensorValue = 0;
-int thres = 520;
+int thres = 162;
 bool doorOpen = false;
 bool prevDoorOpen = false;
 bool in = true;
@@ -17,6 +18,8 @@ void setup() {
   Serial.begin(9600);
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW);
+  pinMode(sensorEnPin, OUTPUT);
+  digitalWrite(sensorEnPin, LOW);
   pinMode(espEnPin, OUTPUT);
   digitalWrite(espEnPin, LOW);
   pinMode(statusPin, OUTPUT);
@@ -42,21 +45,23 @@ void sendCommand() {
 }
 
 void loop() {
+    digitalWrite(sensorEnPin, HIGH);
     digitalWrite(ledPin, HIGH);
     // Give the led time to shine, doesn't work otherwise
     delay(40);
     sensorValue = analogRead(sensorPin);
     digitalWrite(ledPin, LOW);
-    doorOpen = sensorValue > thres;
+    digitalWrite(sensorEnPin, LOW);
+    doorOpen = sensorValue < thres;
 #ifdef LEDDEBUG
     if(!doorOpen) {
-    digitalWrite(statusPin, HIGH);
-    delay(200);
-    digitalWrite(statusPin, LOW);
+      digitalWrite(statusPin, HIGH);
+      delay(100);
+      digitalWrite(statusPin, LOW);
     } else {
-    digitalWrite(statusPin, HIGH);
-    delay(1000);
-    digitalWrite(statusPin, LOW);
+      digitalWrite(statusPin, HIGH);
+      delay(1000);
+      digitalWrite(statusPin, LOW);
     }
 #endif
     if(!prevDoorOpen && doorOpen) {
@@ -71,6 +76,6 @@ void loop() {
     Serial.println(sensorValue);
     Serial.println();
  #endif
-    LowPower.idle(SLEEP_1S, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF, USART0_OFF, TWI_OFF);
+    LowPower.idle(SLEEP_2S, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF, USART0_OFF, TWI_OFF);
 }
 
