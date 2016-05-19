@@ -10,7 +10,7 @@ int espEnPin = 3;
 int ledPin = 2;
 int statusPin = 4;
 int sensorValue = 0;
-int thres = 162;
+int thres = 300;
 bool doorOpen = false;
 bool prevDoorOpen = false;
 bool in = true;
@@ -47,12 +47,12 @@ void sendCommand() {
 void loop() {
     digitalWrite(sensorEnPin, HIGH);
     digitalWrite(ledPin, HIGH);
-    // Give the led time to shine, doesn't work otherwise
-    delay(40);
+    delay(10);
     sensorValue = analogRead(sensorPin);
+    delay(10);
     digitalWrite(ledPin, LOW);
     digitalWrite(sensorEnPin, LOW);
-    doorOpen = sensorValue < thres;
+    doorOpen = sensorValue > thres;
 #ifdef LEDDEBUG
     if(!doorOpen) {
       digitalWrite(statusPin, HIGH);
