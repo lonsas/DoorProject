@@ -26,7 +26,7 @@ while True:
         data = connection.recv(8)
         logging.info('received "%s"' % data)
         if data:
-            if data == 'DOOROPEN':
+            if data == b'DOOROPEN':
                 logging.info('play-pause')
                 call(['playerctl', 'play-pause'])
             connection.sendall(data)
@@ -34,3 +34,4 @@ while True:
         connection.close()
         logging.info('client disconnected: %s, %s' % client_address)
 sock.close()
+
